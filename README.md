@@ -1,1 +1,1 @@
-# job-scheduler-of-CNN-workers-with-PyCompSs
+# job-scheduler-of-CNN-workers-with-PyCOMPSs
