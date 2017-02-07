@@ -11,12 +11,10 @@
 
 
   #   #BSUB -q debug
-  echo "------------- Hecuba app nodes config file  --------------"
+  echo "----------------- app nodes config file  -------------------"
   CURR_DIR=`pwd`
   export APPPATH=$CURR_DIR/test_tf
-  HECUBA_APP=$APPPATH/inference_pycompss.py
-  HECUBA_DIR=$APPPATH/hecuba-remote
-  STORAGE=$HECUBA_DIR/StorageItf.jar
+  PYTHON_APP=$APPPATH/inference_pycompss.py
   API_PATH=$APPPATH/
   CASSANDRA_MODULE_PATH=/gpfs/scratch/bsc31/bsc31093/apache-cassandra-3.4/module
 
@@ -27,13 +25,13 @@
   module load gcc/latest impi/4.1.3.049 PYTHON/2.7.12_ML EXTRAE
   export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 
-  echo "------------------- pythonpath: cassandra python driver -------------------"
+  echo "------------ pythonpath: cassandra python driver -----------"
   export PYTHONPATH=$CURR_DIR/.local/lib/python2.7/site-packages/futures-3.0.3-py2.7.egg:$PYTHONPATH
 
-  echo "------------------- pythonpath:Hecuba requirements -------------------"
-  export PYTHONPATH=$API_PATH:$HECUBA_DIR:$APPPATH:$PYTHONPATH
+  echo "-------------- pythonpath: Other requirements --------------"
+  export PYTHONPATH=$API_PATH:$APPPATH:$PYTHONPATH
 
-  echo "------------------- Get job nodes  -----------------"
+  echo "---------------------- Get job nodes  ----------------------"
   HOSTSARRAY=($LSB_HOSTS) 
   CLIENTHOST=${HOSTSARRAY[0]} #1st node for client 
   DSNODES=${HOSTSARRAY[@]:1}  #rest of nodes for DS
@@ -48,6 +46,4 @@
   --debug \
   --graph \
   --pythonpath=$PYTHONPATH \
-  --classpath=$STORAGE \
-  $HECUBA_APP
-
+  $PYTHON_APP
