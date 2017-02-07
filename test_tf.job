@@ -1,0 +1,53 @@
+#!/bin/bash
+
+#BSUB -J   TF
+#BSUB -W   00:40
+#BSUB -cwd '/home/bsc31/bsc31093'
+#BSUB -oo  '/home/bsc31/bsc31093/tf_SN_%J.out'
+#BSUB -eo  '/home/bsc31/bsc31093/tf_SN_%J.err'
+#BSUB -x
+#BSUB -n   16
+#BSUB -R   'span[ptile=1]'
+
+
+  #   #BSUB -q debug
+  echo "------------- Hecuba app nodes config file  --------------"
+  CURR_DIR=`pwd`
+  export APPPATH=$CURR_DIR/test_tf
+  HECUBA_APP=$APPPATH/inference_pycompss.py
+  HECUBA_DIR=$APPPATH/hecuba-remote
+  STORAGE=$HECUBA_DIR/StorageItf.jar
+  API_PATH=$APPPATH/
+  CASSANDRA_MODULE_PATH=/gpfs/scratch/bsc31/bsc31093/apache-cassandra-3.4/module
+
+  module purge
+  module load COMPSs/trunk
+  module load MKL/2017.0.098
+  module unload PYTHON/2.7.3
+  module load gcc/latest impi/4.1.3.049 PYTHON/2.7.12_ML EXTRAE
+  export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
+
+  echo "------------------- pythonpath: cassandra python driver -------------------"
+  export PYTHONPATH=$CURR_DIR/.local/lib/python2.7/site-packages/futures-3.0.3-py2.7.egg:$PYTHONPATH
+
+  echo "------------------- pythonpath:Hecuba requirements -------------------"
+  export PYTHONPATH=$API_PATH:$HECUBA_DIR:$APPPATH:$PYTHONPATH
+
+  echo "------------------- Get job nodes  -----------------"
+  HOSTSARRAY=($LSB_HOSTS) 
+  CLIENTHOST=${HOSTSARRAY[0]} #1st node for client 
+  DSNODES=${HOSTSARRAY[@]:1}  #rest of nodes for DS
+
+  echo "----------------- Launching enqueue_compss -----------------"
+  launch_compss \
+  --tasks_per_node=8 \
+  --master_node=$CLIENTHOST \
+  --worker_nodes="$DSNODES" \
+  --lang=python \
+  --network=infiniband \
+  --debug \
+  --graph \
+  --pythonpath=$PYTHONPATH \
+  --classpath=$STORAGE \
+  $HECUBA_APP
+
