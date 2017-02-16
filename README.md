@@ -3,17 +3,23 @@
 The following code implements an inference process of multiple parallel images
 using PyCOMPSs on top of TensorFlow.
 
-## TensorFlow inference
-
 The trained model weights have been exported using `tf.train.export_meta_graph`
 [[1]][API][[2]][howto], which returns a single file with the model definition
-(layer configuration, shape, hyperparameters, etc.) and the model weights.
-Then, we have *frozen* the model weights, which means that instead of having
+(layer configuration, layer shape, hyperparameters, etc.) and the model weights.
+Then the model weights have been *frozen* , which means that instead of having
 them defined as variables, and initializing the graph every time the model is
 loaded, we save them as constants in order to skip the initialization step.
 
+As we use this model for inference, we do not need to further train the weights,
+thus we can save them as constants. This method is often used to reduce the
+overhead of the network initialization, and we could prune the execution graph by
+removing the unused nodes that are only used for the training phase, although it
+is out of the scope for this test.
+
 The following piece of code shows how each of the workers will load the model
-using the `tf.import_graph_def`[[1]][API2] function:
+using the `tf.import_graph_def`[[1]][API2] function. We load the model weights
+and the graph structure from the protobuf file:
+
 ```python
 def load_graph(frozen_graph_filename):
   with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
@@ -31,10 +37,17 @@ def load_graph(frozen_graph_filename):
   return graph
 ```
 
-We then define the main function for the workers to run. The input of the model
-is an image path (string) and the output is the predicted class (integer).
+We define the main function the workers will run. The input of the model is an
+image path (string) and the output is the predicted class (integer). Each one of
+the tasks will get the image path to process, and will be loaded to the model
+using the *feed_dict* parameter. We constrain the resources each one of the
+workers is able to use using `tf.ConfigProto`. For this specific test we were
+interested to constrain each worker to use a single thread.
 
 ```python
+NUM_CORES = 1
+DISABLE_OPTIMIZATION = True
+
 @task(res=OUT, returns=int)
 def main(path, imagepath, img, res):
     image = str(imagepath + img)
@@ -57,12 +70,29 @@ def main(path, imagepath, img, res):
     return res
 ```
 
+The loop to initialize the workers and gather the results is the following:
 
+```python
+import os
+import argparse
+import tensorflow as tf
+from pycompss.api.task import task
+from pycompss.api.parameter import OUT
+from pycompss.api.api import compss_wait_on
 
+cwd = os.getcwd()
+path = cwd + '/test_tf/'
+imagepath = path + 'input/'
+results = filenames = []
+for filename in os.listdir(imagepath):
+    filenames.append(filename)
+    results.append(main(str(path), str(imagepath), str(filename), 1))
 
+results = compss_wait_on(results)
 
-
-
+for ind in range(0, len(filenames)):
+    print("result of " + str(filenames[ind]) + ": " + str(results[ind]))
+```
 
 [API]: https://www.tensorflow.org/api_docs/python/state_ops/exporting_and_importing_meta_graphs#export_meta_graph
 [API2]: https://www.tensorflow.org/api_docs/python/framework/utility_functions#import_graph_def
