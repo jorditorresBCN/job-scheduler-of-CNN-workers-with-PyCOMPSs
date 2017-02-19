@@ -96,7 +96,7 @@ for ind in range(0, len(filenames)):
 
 **PyCOMPSs**
 
-We have chosen to use COMP Superscalar[[4]][COMPSs](COMPSs), a framework which aims to ease the development and execution of applications for distributed infrastructures. The specific chosen framework is PyCOMPSs[[5]][PyCOMPSs] (the COMPSs Python binding). COMPSs is also complemented with a set of tools for facilitating the development, execution monitoring and post-mortem performance analysis. One of the tools is Extrae, a package devoted to generate Paraver trace-files, to monitor the correct execution of our application. With COMPSs, we can also obtain a graph of the tasks execution, to check the correct execution of the parallel application.
+We have chosen to use COMP Superscalar[[4]][COMPSs](COMPSs), a framework which aims to ease the development and execution of applications for distributed infrastructures. The specific chosen framework is PyCOMPSs[[5]][PyCOMPSs] (the COMPSs Python binding). COMPSs is also complemented with a set of tools for facilitating the development, execution monitoring and post-mortem performance analysis. One of the tools is Extrae, a package devoted to generate Paraver trace-files, to monitor the correct execution of our application (the generated traces can be found in the Results folder). With COMPSs, we can also obtain a graph of the tasks execution, to check the correct execution of the parallel application (it can also be found in the Results folder).
 
 To parallelize our task using PyCOMPSs, only a few lines of code need to be added:
 - Import the pycompss task to use the parallel task decorators, the compss_wait_on to wait for all the parallel tasks to finish, and the needed parameters for the task decorators.
@@ -108,8 +108,10 @@ from pycompss.api.api import compss_wait_on
 - To add a decorator to the tasks we want to be parallel, and insert the needed information about the parameters. More information on this can be found in the COMPSs manual[[6]][COMPSsManual].
 ```python
 @task(res=OUT, returns=int)
+def main(path, imagepath, img, res):
+...
 ```
-- The barrier for the parallel tasks
+- The barrier for the parallel tasks.
 ```python
 results = compss_wait_on(results)
 ```
