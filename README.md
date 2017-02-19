@@ -93,7 +93,11 @@ results = compss_wait_on(results)
 for ind in range(0, len(filenames)):
     print("result of " + str(filenames[ind]) + ": " + str(results[ind]))
 ```
+
+**PyCOMPSs**
+
 We have chosen to use COMP Superscalar[[4]][COMPSs](COMPSs), a framework which aims to ease the development and execution of applications for distributed infrastructures. The specific chosen framework is PyCOMPSs[[5]][PyCOMPSs] (the COMPSs Python binding). COMPSs is also complemented with a set of tools for facilitating the development, execution monitoring and post-mortem performance analysis. One of the tools is Extrae, a package devoted to generate Paraver trace-files, to monitor the correct execution of our application. With COMPSs, we can also obtain a graph of the tasks execution, to check the correct execution of the parallel application.
+
 To parallelize our task using PyCOMPSs, only a few lines of code need to be added:
 - Import the pycompss task to use the parallel task decorators, the compss_wait_on to wait for all the parallel tasks to finish, and the needed parameters for the task decorators.
 ```python
@@ -101,13 +105,23 @@ from pycompss.api.task import task
 from pycompss.api.parameter import OUT
 from pycompss.api.api import compss_wait_on
 ```
-- To add a decorator to the tasks we want to be parallel, and insert the needed information about the parameters. More information on this can be found in the COMPSs manual [[6]][COMPSsManual].
+- To add a decorator to the tasks we want to be parallel, and insert the needed information about the parameters. More information on this can be found in the COMPSs manual[[6]][COMPSsManual].
 ```python
 @task(res=OUT, returns=int)
 ```
+- The barrier for the parallel tasks
+```python
+results = compss_wait_on(results)
+```
+
+**Experiments**
+
+Our experiments have been run on MareNostrum3[[7]][MN3]. We have executed the application with variable number of Nodes and CPU's per node, in order to test the scalability. The results can be found in the Results folder.
+
 [API]: https://www.tensorflow.org/api_docs/python/state_ops/exporting_and_importing_meta_graphs#export_meta_graph
 [API2]: https://www.tensorflow.org/api_docs/python/framework/utility_functions#import_graph_def
 [howto]: https://www.tensorflow.org/how_tos/meta_graph/
 [COMPSs]: https://www.bsc.es/research-and-development/software-and-apps/software-list/comp-superscalar/documentation
 [PyCOMPSs]: http://journals.sagepub.com/doi/abs/10.1177/1094342015594678
 [COMPSsManual]: http://compss.bsc.es/releases/compss/latest/docs/COMPSs_User_Manual_App_Development.pdf?tracked=true
+[MN3]: https://www.bsc.es/innovation-and-services/supercomputers-and-facilities/marenostrum
