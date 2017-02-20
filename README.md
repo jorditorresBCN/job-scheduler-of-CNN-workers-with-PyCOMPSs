@@ -3,6 +3,8 @@
 The following code implements an inference process of multiple parallel images
 using PyCOMPSs on top of TensorFlow.
 
+**CNN workers**
+
 The trained model weights have been exported using `tf.train.export_meta_graph`
 [[1]][API][[2]][howto], which returns a single file with the model definition
 (layer configuration, layer shape, hyperparameters, etc.) and the model weights.
@@ -96,7 +98,7 @@ for ind in range(0, len(filenames)):
 
 **PyCOMPSs**
 
-We have chosen to use COMP Superscalar[[4]][COMPSs](COMPSs), a framework which aims to ease the development and execution of applications for distributed infrastructures. The specific chosen framework is PyCOMPSs[[5]][PyCOMPSs] (the COMPSs Python binding). COMPSs is also complemented with a set of tools for facilitating the development, execution monitoring and post-mortem performance analysis. One of the tools is Extrae, a package devoted to generate Paraver trace-files, to monitor the correct execution of our application (the generated traces can be found in the Results folder). With COMPSs, we can also obtain a graph of the tasks execution, to check the correct execution of the parallel application (it can also be found in the Results folder).
+We have chosen to use COMP Superscalar[[4]][COMPSs](COMPSs), a framework which aims to ease the development and execution of applications for distributed infrastructures. The specific chosen framework is PyCOMPSs[[5]][PyCOMPSs] (the COMPSs Python binding). COMPSs is also complemented with a set of tools for facilitating the development, execution monitoring and post-mortem performance analysis. One of the tools is Extrae, a package devoted to generate Paraver trace-files, to monitor the correct execution of our application. With COMPSs, we can also obtain a graph of the tasks execution, to check the correct execution of the parallel application.
 
 To parallelize our task using PyCOMPSs, only a few lines of code need to be added:
 - Import the pycompss task to use the parallel task decorators, the compss_wait_on to wait for all the parallel tasks to finish, and the needed parameters for the task decorators.
@@ -111,14 +113,14 @@ from pycompss.api.api import compss_wait_on
 def main(path, imagepath, img, res):
 ...
 ```
-- The barrier for the parallel tasks.
+- To add the barrier for the parallel tasks.
 ```python
 results = compss_wait_on(results)
 ```
 
 **Experiments**
 
-Our experiments have been run on MareNostrum3[[7]][MN3]. We have executed the application with variable number of Nodes and CPU's per node, in order to test the scalability. The results can be found in the Results folder.
+Our experiments have been run on MareNostrum3[[7]][MN3]. We have executed the application with variable number of Nodes (1-2-3-4, 2-4-8-16) and CPU's per node (2-4-8-16), in order to test the scalability. The results can be found in the Results/Scalability folder. A general view of the generated traces of the 3 experiments can also be found in the Results/Traces folder. Finally, a dependencies graph of the parallel tasks can be found in the Results/Graph folder.
 
 [API]: https://www.tensorflow.org/api_docs/python/state_ops/exporting_and_importing_meta_graphs#export_meta_graph
 [API2]: https://www.tensorflow.org/api_docs/python/framework/utility_functions#import_graph_def
