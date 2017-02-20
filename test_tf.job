@@ -1,15 +1,15 @@
 #!/bin/bash
 
 #BSUB -J   TF
-#BSUB -W   00:40
+#BSUB -W   00:30
 #BSUB -cwd '/home/bsc31/bsc31093'
-#BSUB -oo  '/home/bsc31/bsc31093/tf_SN_%J.out'
-#BSUB -eo  '/home/bsc31/bsc31093/tf_SN_%J.err'
+#BSUB -oo  '/home/bsc31/bsc31093/tf_%J.out'
+#BSUB -eo  '/home/bsc31/bsc31093/tf_%J.err'
 #BSUB -x
 #BSUB -n   17
 #BSUB -R   'span[ptile=1]'
 
-  echo "------------- Hecuba app nodes config file  --------------"
+  echo "------------------------ app nodes config file  ---------------------------"
   CURR_DIR=`pwd`
   export APPPATH=$CURR_DIR/test_tf
   PYTHON_APP=$APPPATH/inference_pycompss.py
@@ -24,15 +24,15 @@
   echo "------------------- pythonpath: cassandra python driver -------------------"
   export PYTHONPATH=$CURR_DIR/.local/lib/python2.7/site-packages/futures-3.0.3-py2.7.egg:$PYTHONPATH
 
-  echo "------------------- pythonpath:Hecuba requirements -------------------"
+  echo "------------------------- pythonpath: requirements ------------------------"
   export PYTHONPATH=$API_PATH:$APPPATH:$PYTHONPATH
 
-  echo "------------------- Get job nodes  -----------------"
+  echo "------------------------------ Get job nodes  -----------------------------"
   HOSTSARRAY=($LSB_HOSTS) 
   CLIENTHOST=${HOSTSARRAY[0]} #1st node for client 
   DSNODES=${HOSTSARRAY[@]:1}  #rest of nodes for DS
 
-  echo "----------------- Launching enqueue_compss -----------------"
+  echo "------------------------ Launching launch_compss --------------------------"
   launch_compss \
   --tasks_per_node=16 \
   --master_node=$CLIENTHOST \
